@@ -1,7 +1,6 @@
 import secrets
-import requests
 from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import Response
+from fastapi.responses import HTMLResponse
 
 app = FastAPI()
 
@@ -25,8 +24,7 @@ def generate_token(email: str = Query(..., description="User email")):
     token = secrets.token_urlsafe(16)
     TOKENS[email] = {
         "token": token,
-        #"redirect_url": "https://chatgpt.com/g/g-67a089879d0c819184d793d8ab8ed247-ai-essay",
-        "redirect_url": "https://naver.com",
+        "redirect_url": "https://chatgpt.com/g/g-67a089879d0c819184d793d8ab8ed247-ai-essay",
         "email": email
     }
 
@@ -36,10 +34,10 @@ def generate_token(email: str = Query(..., description="User email")):
         "auth_link": f"https://web-production-597ec.up.railway.app/auth?token={token}"
     }
 
-# ✅ 프록시 방식 토큰 인증 API
+# ✅ 중간 리디렉트 페이지 (보안 강화)
 @app.get("/auth")
 def authenticate(token: str):
-    """토큰을 검증하고 구매자의 이메일을 확인 후 데이터를 반환"""
+    """토큰을 검증하고 구매자의 이메일을 확인 후 중간 리디렉트 페이지 제공"""
 
     # ✅ 토큰이 유효한지 확인
     email = next((email for email, data in TOKENS.items() if data["token"] == token), None)
@@ -49,9 +47,25 @@ def authenticate(token: str):
     # ✅ 로그 (선택적)
     print(f"User {email} authenticated successfully.")
 
-    # ✅ FastAPI 서버가 `redirect_url`의 데이터를 직접 가져와서 반환 (프록시 방식)
+    # ✅ 최종 `redirect_url` 가져오기
     chatgpt_url = TOKENS[email]["redirect_url"]
-    response = requests.get(chatgpt_url)
 
-    # ✅ 구매자는 원본 `redirect_url`을 절대 알 수 없음
-    return Response(content=response.content, media_type=response.headers.get("content-type"))
+    # ✅ HTML 리디렉트 페이지 생성 (구매자는 URL을 직접 볼 수 없음)
+    html_content = f"""
+    <html>
+        <head>
+            <meta http-equiv="refresh" content="3;url={chatgpt_url}" />
+            <title>Redirecting...</title>
+        </head>
+        <body>
+            <p>Authentication successful! Redirecting in 3 seconds...</p>
+            <script>
+                setTimeout(function() {{
+                    window.location.href = "{chatgpt_url}";
+                }}, 3000);
+            </script>
+        </body>
+    </html>
+    """
+
+    return HTMLResponse(content=html_content)
