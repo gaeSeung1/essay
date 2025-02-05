@@ -39,5 +39,5 @@ def read_root():
     return {"message": "FastAPI server is running!"}
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8000))
+    port = int(os.getenv("PORT", 8000))  # 환경 변수에서 포트 값 가져오기
     uvicorn.run(app, host="0.0.0.0", port=port, log_level="info")
