@@ -2,6 +2,9 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import RedirectResponse
 import time
 import secrets
+import uvicorn
+import os
+
 
 app = FastAPI()
 
@@ -34,3 +37,8 @@ def authenticate(token: str):
 @app.get("/")
 def read_root():
     return {"message": "FastAPI server is running!"}
+
+
+if __name__ == "__main__":
+    port = int(os.getenv("PORT", 8000))  # Railway 환경 변수를 읽어서 포트 설정
+    uvicorn.run(app, host="0.0.0.0", port=port)
