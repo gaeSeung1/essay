@@ -25,7 +25,8 @@ def generate_token(email: str = Query(..., description="User email")):
     token = secrets.token_urlsafe(16)
     TOKENS[email] = {
         "token": token,
-        "redirect_url": "https://chatgpt.com/g/g-67a089879d0c819184d793d8ab8ed247-ai-essay",
+        #"redirect_url": "https://chatgpt.com/g/g-67a089879d0c819184d793d8ab8ed247-ai-essay",
+        "redirect_url": "https://naver.com",
         "email": email
     }
 
