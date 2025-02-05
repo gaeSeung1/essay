@@ -38,7 +38,6 @@ def authenticate(token: str):
 def read_root():
     return {"message": "FastAPI server is running!"}
 
-
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 8000))  # Railway 환경 변수를 읽어서 포트 설정
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    port = int(os.getenv("PORT", 8000))  # 환경 변수에서 포트 값 가져오기
+    uvicorn.run(app, host="0.0.0.0", port=port, log_level="info")
