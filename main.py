@@ -1,11 +1,8 @@
-from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import Response
 import time
 import secrets
-import uvicorn
-import os
 import requests
-
+from fastapi import FastAPI, HTTPException, Query
+from fastapi.responses import Response
 
 app = FastAPI()
 
@@ -52,15 +49,3 @@ def authenticate(token: str):
 
     # ✅ 원본 사이트의 응답을 그대로 반환 (구매자는 원본 URL을 모름)
     return Response(content=response.content, media_type=response.headers.get("content-type"))
-
-
-
-
-
-@app.get("/")
-def read_root():
-    return {"message": "FastAPI server is running!"}
-
-if __name__ == "__main__":
-    port = int(os.getenv("PORT", 8080))  # 환경 변수에서 포트 값 가져오기
-    uvicorn.run(app, host="0.0.0.0", port=port, log_level="info")
