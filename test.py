@@ -31,9 +31,6 @@ def authenticate(token: str):
     return RedirectResponse(url=chatgpt_url)
 
 
-'''
-git add test.py
-git commit --amend -m "Overwrite test.py with new changes"
-git push --force origin main
-
-'''
+@app.get("/")
+def read_root():
+    return {"message": "FastAPI server is running!"}
