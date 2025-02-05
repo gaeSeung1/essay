@@ -30,7 +30,6 @@ def authenticate(token: str):
     chatgpt_url = TOKENS[token]["redirect_url"]
     return RedirectResponse(url=chatgpt_url)
 
-print('hi')
 
 '''
 git add test.py
