@@ -2,6 +2,7 @@ import secrets
 import requests
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import Response
+import uvicorn
 
 app = FastAPI()
 
@@ -55,3 +56,11 @@ def authenticate(token: str):
     response = requests.get(chatgpt_url)
 
     return Response(content=response.content, media_type=response.headers.get("content-type"))
+
+@app.get("/")
+def read_root():
+    return {"message": "FastAPI server is running!"}
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8000))  # Railway 환경 변수에서 PORT 값을 가져옴
+    uvicorn.run(app, host="0.0.0.0", port=port)
