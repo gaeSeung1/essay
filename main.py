@@ -1,12 +1,11 @@
-from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import RedirectResponse
 import secrets
-import uvicorn
-import os
+import requests
+from fastapi import FastAPI, HTTPException, Query
+from fastapi.responses import Response
 
 app = FastAPI()
 
-# ✅ 토큰 저장소 (이메일 기반, 영구 유지)
+# ✅ 이메일 기반 토큰 저장소 (토큰은 영구적으로 유지됨)
 TOKENS = {}
 
 # ✅ 토큰 생성 API
@@ -36,10 +35,10 @@ def generate_token(email: str = Query(..., description="User email")):
         "auth_link": f"https://web-production-597ec.up.railway.app/auth?token={token}"
     }
 
-# ✅ 토큰 인증 API (FastAPI가 프록시 역할 수행)
+# ✅ 프록시 방식 토큰 인증 API
 @app.get("/auth")
 def authenticate(token: str):
-    """토큰을 검증하고, 유효하면 리디렉트"""
+    """토큰을 검증하고 구매자의 이메일을 확인 후 데이터를 반환"""
 
     # ✅ 토큰이 유효한지 확인
     email = next((email for email, data in TOKENS.items() if data["token"] == token), None)
@@ -49,16 +48,9 @@ def authenticate(token: str):
     # ✅ 로그 (선택적)
     print(f"User {email} authenticated successfully.")
 
-    # ✅ ChatGPT 맞춤형 GPT 페이지로 리디렉트
+    # ✅ FastAPI 서버가 `redirect_url`의 데이터를 직접 가져와서 반환 (프록시 방식)
     chatgpt_url = TOKENS[email]["redirect_url"]
-    return RedirectResponse(url=chatgpt_url)
+    response = requests.get(chatgpt_url)
 
-# ✅ 서버 상태 확인용 기본 엔드포인트
-@app.get("/")
-def read_root():
-    return {"message": "FastAPI server is running!"}
-
-# ✅ FastAPI 실행
-if __name__ == "__main__":
-    port = int(os.getenv("PORT", 8080))  # 환경 변수에서 포트 값 가져오기
-    uvicorn.run(app, host="0.0.0.0", port=port, log_level="info")
+    # ✅ 구매자는 원본 `redirect_url`을 절대 알 수 없음
+    return Response(content=response.content, media_type=response.headers.get("content-type"))
